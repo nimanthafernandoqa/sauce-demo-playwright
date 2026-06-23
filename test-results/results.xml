@@ -1,0 +1,386 @@
+<testsuites id="" name="" tests="176" failures="0" skipped="0" errors="0" time="231.289222">
+<testsuite name="auth/login.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="chromium" tests="11" failures="0" skipped="0" time="64.626" errors="0">
+<testcase name="Authentication › TC-AUTH-01: standard user can log in successfully" classname="auth/login.spec.ts" time="7.677">
+</testcase>
+<testcase name="Authentication › TC-AUTH-02: login page has correct title" classname="auth/login.spec.ts" time="6.931">
+</testcase>
+<testcase name="Authentication › TC-AUTH-03: login fields are visible and focusable" classname="auth/login.spec.ts" time="7.017">
+</testcase>
+<testcase name="Authentication › TC-AUTH-04: locked out user sees error message" classname="auth/login.spec.ts" time="7.446">
+</testcase>
+<testcase name="Authentication › TC-AUTH-05: empty username shows validation error" classname="auth/login.spec.ts" time="4.95">
+</testcase>
+<testcase name="Authentication › TC-AUTH-06: empty password shows validation error" classname="auth/login.spec.ts" time="7.222">
+</testcase>
+<testcase name="Authentication › TC-AUTH-07: wrong password shows error message" classname="auth/login.spec.ts" time="4.871">
+</testcase>
+<testcase name="Authentication › TC-AUTH-08: error banner can be dismissed" classname="auth/login.spec.ts" time="4.47">
+</testcase>
+<testcase name="Authentication › TC-AUTH-09: password field masks input" classname="auth/login.spec.ts" time="3.654">
+</testcase>
+<testcase name="Authentication › TC-AUTH-10: user can log out and is redirected to login" classname="auth/login.spec.ts" time="5.651">
+</testcase>
+<testcase name="Authentication › TC-AUTH-11: unauthenticated user cannot access inventory directly" classname="auth/login.spec.ts" time="4.737">
+</testcase>
+</testsuite>
+<testsuite name="cart/cart.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="chromium" tests="8" failures="0" skipped="0" time="49.684" errors="0">
+<testcase name="Shopping Cart › TC-CART-01: empty cart shows no items" classname="cart/cart.spec.ts" time="4.992">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-02: added product appears in cart" classname="cart/cart.spec.ts" time="5.987">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-03: multiple added products all appear in cart" classname="cart/cart.spec.ts" time="7.16">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-04: item prices in cart match inventory prices" classname="cart/cart.spec.ts" time="6.18">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-05: removing item from cart removes it from the list" classname="cart/cart.spec.ts" time="6.856">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-06: Continue Shopping returns to inventory" classname="cart/cart.spec.ts" time="6.323">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-07: Checkout button navigates to checkout step 1" classname="cart/cart.spec.ts" time="6.144">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-08: cart persists items after navigating back to inventory" classname="cart/cart.spec.ts" time="6.042">
+</testcase>
+</testsuite>
+<testsuite name="checkout/checkout.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="chromium" tests="12" failures="0" skipped="0" time="81.359" errors="0">
+<testcase name="Checkout Flow › TC-CHK-01: checkout step 1 loads with info form" classname="checkout/checkout.spec.ts" time="6.208">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-02: missing first name shows error" classname="checkout/checkout.spec.ts" time="6.619">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-03: missing last name shows error" classname="checkout/checkout.spec.ts" time="6.722">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-04: missing postal code shows error" classname="checkout/checkout.spec.ts" time="6.637">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-05: valid info proceeds to step 2" classname="checkout/checkout.spec.ts" time="6.786">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-06: cancel on step 1 returns to cart" classname="checkout/checkout.spec.ts" time="6.261">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-07: step 2 shows ordered items" classname="checkout/checkout.spec.ts" time="6.815">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-08: step 2 total = subtotal + tax" classname="checkout/checkout.spec.ts" time="7.209">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-09: subtotal matches sum of item prices" classname="checkout/checkout.spec.ts" time="6.688">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-10: completing checkout shows order confirmation" classname="checkout/checkout.spec.ts" time="7.073">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-11: Back Home button after order returns to inventory" classname="checkout/checkout.spec.ts" time="7.22">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-12: cart is empty after successful order" classname="checkout/checkout.spec.ts" time="7.121">
+</testcase>
+</testsuite>
+<testsuite name="inventory/products.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="chromium" tests="13" failures="0" skipped="0" time="71.495" errors="0">
+<testcase name="Product Inventory › TC-INV-01: inventory page shows 6 products" classname="inventory/products.spec.ts" time="5.356">
+</testcase>
+<testcase name="Product Inventory › TC-INV-02: each product has a name, description, price and image" classname="inventory/products.spec.ts" time="6.083">
+</testcase>
+<testcase name="Product Inventory › TC-INV-03: each product has an Add to Cart button" classname="inventory/products.spec.ts" time="5.431">
+</testcase>
+<testcase name="Product Inventory › TC-INV-04: sort A-Z orders products alphabetically" classname="inventory/products.spec.ts" time="5.054">
+</testcase>
+<testcase name="Product Inventory › TC-INV-05: sort Z-A orders products in reverse alphabetical order" classname="inventory/products.spec.ts" time="5.3">
+</testcase>
+<testcase name="Product Inventory › TC-INV-06: sort low-to-high orders products by ascending price" classname="inventory/products.spec.ts" time="5.306">
+</testcase>
+<testcase name="Product Inventory › TC-INV-07: sort high-to-low orders products by descending price" classname="inventory/products.spec.ts" time="5.454">
+</testcase>
+<testcase name="Product Inventory › TC-INV-08: adding a product increments the cart badge" classname="inventory/products.spec.ts" time="5.016">
+</testcase>
+<testcase name="Product Inventory › TC-INV-09: adding multiple products updates badge count correctly" classname="inventory/products.spec.ts" time="6.282">
+</testcase>
+<testcase name="Product Inventory › TC-INV-10: Add to Cart button changes to Remove after adding" classname="inventory/products.spec.ts" time="5.589">
+</testcase>
+<testcase name="Product Inventory › TC-INV-11: removing a product decrements the cart badge" classname="inventory/products.spec.ts" time="6.24">
+</testcase>
+<testcase name="Product Inventory › TC-INV-12: clicking a product name navigates to its detail page" classname="inventory/products.spec.ts" time="5.517">
+</testcase>
+<testcase name="Product Inventory › TC-INV-13: cart icon navigates to cart page" classname="inventory/products.spec.ts" time="4.867">
+</testcase>
+</testsuite>
+<testsuite name="auth/login.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="firefox" tests="11" failures="0" skipped="0" time="72.394" errors="0">
+<testcase name="Authentication › TC-AUTH-01: standard user can log in successfully" classname="auth/login.spec.ts" time="11.001">
+</testcase>
+<testcase name="Authentication › TC-AUTH-02: login page has correct title" classname="auth/login.spec.ts" time="7.192">
+</testcase>
+<testcase name="Authentication › TC-AUTH-03: login fields are visible and focusable" classname="auth/login.spec.ts" time="9.923">
+</testcase>
+<testcase name="Authentication › TC-AUTH-04: locked out user sees error message" classname="auth/login.spec.ts" time="6.009">
+</testcase>
+<testcase name="Authentication › TC-AUTH-05: empty username shows validation error" classname="auth/login.spec.ts" time="10.606">
+</testcase>
+<testcase name="Authentication › TC-AUTH-06: empty password shows validation error" classname="auth/login.spec.ts" time="4.493">
+</testcase>
+<testcase name="Authentication › TC-AUTH-07: wrong password shows error message" classname="auth/login.spec.ts" time="2.758">
+</testcase>
+<testcase name="Authentication › TC-AUTH-08: error banner can be dismissed" classname="auth/login.spec.ts" time="4.356">
+</testcase>
+<testcase name="Authentication › TC-AUTH-09: password field masks input" classname="auth/login.spec.ts" time="2.785">
+</testcase>
+<testcase name="Authentication › TC-AUTH-10: user can log out and is redirected to login" classname="auth/login.spec.ts" time="6.644">
+</testcase>
+<testcase name="Authentication › TC-AUTH-11: unauthenticated user cannot access inventory directly" classname="auth/login.spec.ts" time="6.627">
+</testcase>
+</testsuite>
+<testsuite name="cart/cart.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="firefox" tests="8" failures="0" skipped="0" time="43.491" errors="0">
+<testcase name="Shopping Cart › TC-CART-01: empty cart shows no items" classname="cart/cart.spec.ts" time="5.6">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-02: added product appears in cart" classname="cart/cart.spec.ts" time="5.969">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-03: multiple added products all appear in cart" classname="cart/cart.spec.ts" time="4.847">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-04: item prices in cart match inventory prices" classname="cart/cart.spec.ts" time="5.648">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-05: removing item from cart removes it from the list" classname="cart/cart.spec.ts" time="5.334">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-06: Continue Shopping returns to inventory" classname="cart/cart.spec.ts" time="5.031">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-07: Checkout button navigates to checkout step 1" classname="cart/cart.spec.ts" time="5.576">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-08: cart persists items after navigating back to inventory" classname="cart/cart.spec.ts" time="5.486">
+</testcase>
+</testsuite>
+<testsuite name="checkout/checkout.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="firefox" tests="12" failures="0" skipped="0" time="65.701" errors="0">
+<testcase name="Checkout Flow › TC-CHK-01: checkout step 1 loads with info form" classname="checkout/checkout.spec.ts" time="4.93">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-02: missing first name shows error" classname="checkout/checkout.spec.ts" time="4.915">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-03: missing last name shows error" classname="checkout/checkout.spec.ts" time="5.579">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-04: missing postal code shows error" classname="checkout/checkout.spec.ts" time="5.403">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-05: valid info proceeds to step 2" classname="checkout/checkout.spec.ts" time="5.515">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-06: cancel on step 1 returns to cart" classname="checkout/checkout.spec.ts" time="5.126">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-07: step 2 shows ordered items" classname="checkout/checkout.spec.ts" time="5.432">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-08: step 2 total = subtotal + tax" classname="checkout/checkout.spec.ts" time="5.724">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-09: subtotal matches sum of item prices" classname="checkout/checkout.spec.ts" time="5.377">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-10: completing checkout shows order confirmation" classname="checkout/checkout.spec.ts" time="5.405">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-11: Back Home button after order returns to inventory" classname="checkout/checkout.spec.ts" time="6.071">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-12: cart is empty after successful order" classname="checkout/checkout.spec.ts" time="6.224">
+</testcase>
+</testsuite>
+<testsuite name="inventory/products.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="firefox" tests="13" failures="0" skipped="0" time="56.587" errors="0">
+<testcase name="Product Inventory › TC-INV-01: inventory page shows 6 products" classname="inventory/products.spec.ts" time="4.035">
+</testcase>
+<testcase name="Product Inventory › TC-INV-02: each product has a name, description, price and image" classname="inventory/products.spec.ts" time="5.302">
+</testcase>
+<testcase name="Product Inventory › TC-INV-03: each product has an Add to Cart button" classname="inventory/products.spec.ts" time="5.223">
+</testcase>
+<testcase name="Product Inventory › TC-INV-04: sort A-Z orders products alphabetically" classname="inventory/products.spec.ts" time="4.682">
+</testcase>
+<testcase name="Product Inventory › TC-INV-05: sort Z-A orders products in reverse alphabetical order" classname="inventory/products.spec.ts" time="4.275">
+</testcase>
+<testcase name="Product Inventory › TC-INV-06: sort low-to-high orders products by ascending price" classname="inventory/products.spec.ts" time="3.402">
+</testcase>
+<testcase name="Product Inventory › TC-INV-07: sort high-to-low orders products by descending price" classname="inventory/products.spec.ts" time="4.188">
+</testcase>
+<testcase name="Product Inventory › TC-INV-08: adding a product increments the cart badge" classname="inventory/products.spec.ts" time="4.08">
+</testcase>
+<testcase name="Product Inventory › TC-INV-09: adding multiple products updates badge count correctly" classname="inventory/products.spec.ts" time="4.064">
+</testcase>
+<testcase name="Product Inventory › TC-INV-10: Add to Cart button changes to Remove after adding" classname="inventory/products.spec.ts" time="4.453">
+</testcase>
+<testcase name="Product Inventory › TC-INV-11: removing a product decrements the cart badge" classname="inventory/products.spec.ts" time="3.987">
+</testcase>
+<testcase name="Product Inventory › TC-INV-12: clicking a product name navigates to its detail page" classname="inventory/products.spec.ts" time="6.508">
+</testcase>
+<testcase name="Product Inventory › TC-INV-13: cart icon navigates to cart page" classname="inventory/products.spec.ts" time="2.388">
+</testcase>
+</testsuite>
+<testsuite name="auth/login.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="webkit" tests="11" failures="0" skipped="0" time="67.493" errors="0">
+<testcase name="Authentication › TC-AUTH-01: standard user can log in successfully" classname="auth/login.spec.ts" time="6.208">
+</testcase>
+<testcase name="Authentication › TC-AUTH-02: login page has correct title" classname="auth/login.spec.ts" time="5.32">
+</testcase>
+<testcase name="Authentication › TC-AUTH-03: login fields are visible and focusable" classname="auth/login.spec.ts" time="5.295">
+</testcase>
+<testcase name="Authentication › TC-AUTH-04: locked out user sees error message" classname="auth/login.spec.ts" time="5.871">
+</testcase>
+<testcase name="Authentication › TC-AUTH-05: empty username shows validation error" classname="auth/login.spec.ts" time="7.382">
+</testcase>
+<testcase name="Authentication › TC-AUTH-06: empty password shows validation error" classname="auth/login.spec.ts" time="10.606">
+</testcase>
+<testcase name="Authentication › TC-AUTH-07: wrong password shows error message" classname="auth/login.spec.ts" time="5.088">
+</testcase>
+<testcase name="Authentication › TC-AUTH-08: error banner can be dismissed" classname="auth/login.spec.ts" time="4.904">
+</testcase>
+<testcase name="Authentication › TC-AUTH-09: password field masks input" classname="auth/login.spec.ts" time="4.562">
+</testcase>
+<testcase name="Authentication › TC-AUTH-10: user can log out and is redirected to login" classname="auth/login.spec.ts" time="6.124">
+</testcase>
+<testcase name="Authentication › TC-AUTH-11: unauthenticated user cannot access inventory directly" classname="auth/login.spec.ts" time="6.133">
+</testcase>
+</testsuite>
+<testsuite name="cart/cart.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="webkit" tests="8" failures="0" skipped="0" time="60.326" errors="0">
+<testcase name="Shopping Cart › TC-CART-01: empty cart shows no items" classname="cart/cart.spec.ts" time="7.049">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-02: added product appears in cart" classname="cart/cart.spec.ts" time="7.794">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-03: multiple added products all appear in cart" classname="cart/cart.spec.ts" time="7.773">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-04: item prices in cart match inventory prices" classname="cart/cart.spec.ts" time="6.897">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-05: removing item from cart removes it from the list" classname="cart/cart.spec.ts" time="7.567">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-06: Continue Shopping returns to inventory" classname="cart/cart.spec.ts" time="7.678">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-07: Checkout button navigates to checkout step 1" classname="cart/cart.spec.ts" time="7.4">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-08: cart persists items after navigating back to inventory" classname="cart/cart.spec.ts" time="8.168">
+</testcase>
+</testsuite>
+<testsuite name="checkout/checkout.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="webkit" tests="12" failures="0" skipped="0" time="127.225" errors="0">
+<testcase name="Checkout Flow › TC-CHK-01: checkout step 1 loads with info form" classname="checkout/checkout.spec.ts" time="8.069">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-02: missing first name shows error" classname="checkout/checkout.spec.ts" time="9.847">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-03: missing last name shows error" classname="checkout/checkout.spec.ts" time="9.092">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-04: missing postal code shows error" classname="checkout/checkout.spec.ts" time="10.107">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-05: valid info proceeds to step 2" classname="checkout/checkout.spec.ts" time="11.035">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-06: cancel on step 1 returns to cart" classname="checkout/checkout.spec.ts" time="10.203">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-07: step 2 shows ordered items" classname="checkout/checkout.spec.ts" time="10.489">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-08: step 2 total = subtotal + tax" classname="checkout/checkout.spec.ts" time="11.021">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-09: subtotal matches sum of item prices" classname="checkout/checkout.spec.ts" time="11.416">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-10: completing checkout shows order confirmation" classname="checkout/checkout.spec.ts" time="11.611">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-11: Back Home button after order returns to inventory" classname="checkout/checkout.spec.ts" time="12.118">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-12: cart is empty after successful order" classname="checkout/checkout.spec.ts" time="12.217">
+</testcase>
+</testsuite>
+<testsuite name="inventory/products.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="webkit" tests="13" failures="0" skipped="0" time="102.514" errors="0">
+<testcase name="Product Inventory › TC-INV-01: inventory page shows 6 products" classname="inventory/products.spec.ts" time="9.578">
+</testcase>
+<testcase name="Product Inventory › TC-INV-02: each product has a name, description, price and image" classname="inventory/products.spec.ts" time="7.536">
+</testcase>
+<testcase name="Product Inventory › TC-INV-03: each product has an Add to Cart button" classname="inventory/products.spec.ts" time="7.156">
+</testcase>
+<testcase name="Product Inventory › TC-INV-04: sort A-Z orders products alphabetically" classname="inventory/products.spec.ts" time="7.48">
+</testcase>
+<testcase name="Product Inventory › TC-INV-05: sort Z-A orders products in reverse alphabetical order" classname="inventory/products.spec.ts" time="7.468">
+</testcase>
+<testcase name="Product Inventory › TC-INV-06: sort low-to-high orders products by ascending price" classname="inventory/products.spec.ts" time="7.707">
+</testcase>
+<testcase name="Product Inventory › TC-INV-07: sort high-to-low orders products by descending price" classname="inventory/products.spec.ts" time="7.565">
+</testcase>
+<testcase name="Product Inventory › TC-INV-08: adding a product increments the cart badge" classname="inventory/products.spec.ts" time="7.419">
+</testcase>
+<testcase name="Product Inventory › TC-INV-09: adding multiple products updates badge count correctly" classname="inventory/products.spec.ts" time="8.769">
+</testcase>
+<testcase name="Product Inventory › TC-INV-10: Add to Cart button changes to Remove after adding" classname="inventory/products.spec.ts" time="7.601">
+</testcase>
+<testcase name="Product Inventory › TC-INV-11: removing a product decrements the cart badge" classname="inventory/products.spec.ts" time="8.296">
+</testcase>
+<testcase name="Product Inventory › TC-INV-12: clicking a product name navigates to its detail page" classname="inventory/products.spec.ts" time="7.904">
+</testcase>
+<testcase name="Product Inventory › TC-INV-13: cart icon navigates to cart page" classname="inventory/products.spec.ts" time="8.035">
+</testcase>
+</testsuite>
+<testsuite name="auth/login.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="Mobile Chrome" tests="11" failures="0" skipped="0" time="92.091" errors="0">
+<testcase name="Authentication › TC-AUTH-01: standard user can log in successfully" classname="auth/login.spec.ts" time="11.711">
+</testcase>
+<testcase name="Authentication › TC-AUTH-02: login page has correct title" classname="auth/login.spec.ts" time="7.912">
+</testcase>
+<testcase name="Authentication › TC-AUTH-03: login fields are visible and focusable" classname="auth/login.spec.ts" time="8.12">
+</testcase>
+<testcase name="Authentication › TC-AUTH-04: locked out user sees error message" classname="auth/login.spec.ts" time="10.097">
+</testcase>
+<testcase name="Authentication › TC-AUTH-05: empty username shows validation error" classname="auth/login.spec.ts" time="15.123">
+</testcase>
+<testcase name="Authentication › TC-AUTH-06: empty password shows validation error" classname="auth/login.spec.ts" time="15.324">
+</testcase>
+<testcase name="Authentication › TC-AUTH-07: wrong password shows error message" classname="auth/login.spec.ts" time="8.214">
+</testcase>
+<testcase name="Authentication › TC-AUTH-08: error banner can be dismissed" classname="auth/login.spec.ts" time="3.911">
+</testcase>
+<testcase name="Authentication › TC-AUTH-09: password field masks input" classname="auth/login.spec.ts" time="2.712">
+</testcase>
+<testcase name="Authentication › TC-AUTH-10: user can log out and is redirected to login" classname="auth/login.spec.ts" time="5.778">
+</testcase>
+<testcase name="Authentication › TC-AUTH-11: unauthenticated user cannot access inventory directly" classname="auth/login.spec.ts" time="3.189">
+</testcase>
+</testsuite>
+<testsuite name="cart/cart.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="Mobile Chrome" tests="8" failures="0" skipped="0" time="75.161" errors="0">
+<testcase name="Shopping Cart › TC-CART-01: empty cart shows no items" classname="cart/cart.spec.ts" time="8.627">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-02: added product appears in cart" classname="cart/cart.spec.ts" time="8.848">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-03: multiple added products all appear in cart" classname="cart/cart.spec.ts" time="9.064">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-04: item prices in cart match inventory prices" classname="cart/cart.spec.ts" time="3.435">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-05: removing item from cart removes it from the list" classname="cart/cart.spec.ts" time="14.44">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-06: Continue Shopping returns to inventory" classname="cart/cart.spec.ts" time="18.933">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-07: Checkout button navigates to checkout step 1" classname="cart/cart.spec.ts" time="3.907">
+</testcase>
+<testcase name="Shopping Cart › TC-CART-08: cart persists items after navigating back to inventory" classname="cart/cart.spec.ts" time="7.907">
+</testcase>
+</testsuite>
+<testsuite name="checkout/checkout.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="Mobile Chrome" tests="12" failures="0" skipped="0" time="69.809" errors="0">
+<testcase name="Checkout Flow › TC-CHK-01: checkout step 1 loads with info form" classname="checkout/checkout.spec.ts" time="4.46">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-02: missing first name shows error" classname="checkout/checkout.spec.ts" time="4.611">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-03: missing last name shows error" classname="checkout/checkout.spec.ts" time="4.485">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-04: missing postal code shows error" classname="checkout/checkout.spec.ts" time="5.636">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-05: valid info proceeds to step 2" classname="checkout/checkout.spec.ts" time="4.861">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-06: cancel on step 1 returns to cart" classname="checkout/checkout.spec.ts" time="5.792">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-07: step 2 shows ordered items" classname="checkout/checkout.spec.ts" time="5.037">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-08: step 2 total = subtotal + tax" classname="checkout/checkout.spec.ts" time="6.184">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-09: subtotal matches sum of item prices" classname="checkout/checkout.spec.ts" time="5.637">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-10: completing checkout shows order confirmation" classname="checkout/checkout.spec.ts" time="6.758">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-11: Back Home button after order returns to inventory" classname="checkout/checkout.spec.ts" time="6.783">
+</testcase>
+<testcase name="Checkout Flow › TC-CHK-12: cart is empty after successful order" classname="checkout/checkout.spec.ts" time="9.565">
+</testcase>
+</testsuite>
+<testsuite name="inventory/products.spec.ts" timestamp="2026-06-23T15:09:58.078Z" hostname="Mobile Chrome" tests="13" failures="0" skipped="0" time="65.83" errors="0">
+<testcase name="Product Inventory › TC-INV-01: inventory page shows 6 products" classname="inventory/products.spec.ts" time="5.339">
+</testcase>
+<testcase name="Product Inventory › TC-INV-02: each product has a name, description, price and image" classname="inventory/products.spec.ts" time="6.922">
+</testcase>
+<testcase name="Product Inventory › TC-INV-03: each product has an Add to Cart button" classname="inventory/products.spec.ts" time="6.494">
+</testcase>
+<testcase name="Product Inventory › TC-INV-04: sort A-Z orders products alphabetically" classname="inventory/products.spec.ts" time="3.564">
+</testcase>
+<testcase name="Product Inventory › TC-INV-05: sort Z-A orders products in reverse alphabetical order" classname="inventory/products.spec.ts" time="4.167">
+</testcase>
+<testcase name="Product Inventory › TC-INV-06: sort low-to-high orders products by ascending price" classname="inventory/products.spec.ts" time="4.123">
+</testcase>
+<testcase name="Product Inventory › TC-INV-07: sort high-to-low orders products by descending price" classname="inventory/products.spec.ts" time="4.855">
+</testcase>
+<testcase name="Product Inventory › TC-INV-08: adding a product increments the cart badge" classname="inventory/products.spec.ts" time="5.969">
+</testcase>
+<testcase name="Product Inventory › TC-INV-09: adding multiple products updates badge count correctly" classname="inventory/products.spec.ts" time="5.041">
+</testcase>
+<testcase name="Product Inventory › TC-INV-10: Add to Cart button changes to Remove after adding" classname="inventory/products.spec.ts" time="4.796">
+</testcase>
+<testcase name="Product Inventory › TC-INV-11: removing a product decrements the cart badge" classname="inventory/products.spec.ts" time="4.592">
+</testcase>
+<testcase name="Product Inventory › TC-INV-12: clicking a product name navigates to its detail page" classname="inventory/products.spec.ts" time="6.644">
+</testcase>
+<testcase name="Product Inventory › TC-INV-13: cart icon navigates to cart page" classname="inventory/products.spec.ts" time="3.324">
+</testcase>
+</testsuite>
+</testsuites>
