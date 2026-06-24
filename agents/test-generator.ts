@@ -1,103 +1,79 @@
 /**
- * AI Test Generation Agent
+ * AI Test Generation Agent (Groq version — free & fast)
  * ─────────────────────────────────────────────────────────────────────────────
- * Uses Claude AI to automatically generate new Playwright TypeScript test cases
- * for pages / features that don't yet have coverage.
+ * Inspects a live page using Playwright, then uses Groq's free API to
+ * generate new Playwright TypeScript test cases automatically.
  *
  * Usage:
- *   npx ts-node agents/test-generator.ts --url https://www.saucedemo.com/inventory-item.html?id=4
- *   npx ts-node agents/test-generator.ts --page ProductDetail
+ *   export GROQ_API_KEY=your-key-here
+ *   npx ts-node agents/test-generator.ts --url https://www.saucedemo.com/inventory-item.html?id=4 --name product-detail
  *
- * Requires:
- *   ANTHROPIC_API_KEY env variable
+ * Free API key: https://console.groq.com
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import Groq from 'groq-sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 import { chromium } from '@playwright/test';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const BASE_URL = 'https://www.saucedemo.com';
+const BASE_URL  = 'https://www.saucedemo.com';
 const TESTS_DIR = path.join(__dirname, '..', 'tests');
 const PAGES_DIR = path.join(__dirname, '..', 'pages');
+const MODEL = 'llama-3.3-70b-versatile';
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── Scrape Page ─────────────────────────────────────────────────────────────
 
-interface PageContext {
-  url: string;
-  title: string;
-  html: string;
-  interactiveElements: string[];
-  existingTests: string[];
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/** Scrape a page using Playwright and extract relevant information */
-async function scrapePage(url: string): Promise<PageContext> {
-  console.log(`🔍 Scraping page: ${url}`);
+async function scrapePage(url: string) {
+  console.log(`🔍 Scraping: ${url}`);
   const browser = await chromium.launch();
-  const page = await browser.newPage();
+  const page    = await browser.newPage();
 
-  // Login first if not on login page
-  if (!url.includes('saucedemo.com') || url !== BASE_URL + '/') {
+  try {
     await page.goto(BASE_URL);
     await page.fill('[data-test="username"]', 'standard_user');
     await page.fill('[data-test="password"]', 'secret_sauce');
     await page.click('[data-test="login-button"]');
-  }
+    await page.goto(url);
+    await page.waitForLoadState('networkidle');
 
-  await page.goto(url);
-  await page.waitForLoadState('networkidle');
-
-  const title = await page.title();
-  const html  = await page.content();
-
-  // Extract interactive elements with their data-test attributes
-  const interactiveElements = await page.evaluate(() => {
-    const elements: string[] = [];
-    document.querySelectorAll('[data-test], button, input, select, a[href]').forEach(el => {
-      const tag        = el.tagName.toLowerCase();
-      const dataTest   = el.getAttribute('data-test');
-      const id         = el.getAttribute('id');
-      const className  = el.className;
-      const text       = el.textContent?.trim().substring(0, 50);
-      const type       = el.getAttribute('type');
-
-      elements.push(
-        JSON.stringify({ tag, dataTest, id, className, text, type })
-      );
+    const title = await page.title();
+    const elements: string[] = await page.evaluate(() => {
+      const result: string[] = [];
+      document.querySelectorAll('[data-test], button, input, select, a[href], h1, h2').forEach((el: Element) => {
+        const tag      = el.tagName.toLowerCase();
+        const dataTest = el.getAttribute('data-test');
+        const id       = el.getAttribute('id');
+        const text     = el.textContent?.trim().substring(0, 50);
+        const type     = el.getAttribute('type');
+        result.push(`${tag} | data-test="${dataTest}" | id="${id}" | text="${text}" | type="${type}"`);
+      });
+      return result.slice(0, 50);
     });
-    return elements;
-  });
 
-  await browser.close();
-
-  // Find existing tests to avoid duplication
-  const existingTests = collectExistingTestNames();
-
-  return { url, title, html: html.substring(0, 8000), interactiveElements, existingTests };
+    return { url, title, elements };
+  } finally {
+    await browser.close();
+  }
 }
 
-/** Collect all test names already written */
-function collectExistingTestNames(): string[] {
+// ─── Collect Existing Tests ───────────────────────────────────────────────────
+
+function getExistingTestNames(): string[] {
   const names: string[] = [];
   const walk = (dir: string) => {
     if (!fs.existsSync(dir)) return;
     fs.readdirSync(dir).forEach(f => {
-      const full = path.join(dir, f);
-      if (fs.statSync(full).isDirectory()) {
-        walk(full);
+      const fp = path.join(dir, f);
+      if (fs.statSync(fp).isDirectory()) {
+        walk(fp);
       } else if (f.endsWith('.spec.ts')) {
-        const content = fs.readFileSync(full, 'utf-8');
-        const matches = content.match(/test\(['"`](.*?)['"`]/g) ?? [];
-        matches.forEach(m => names.push(m.replace(/test\(['"`]/, '').replace(/['"`]$/, '')));
+        const content = fs.readFileSync(fp, 'utf-8');
+        const matches = content.match(/test\s*\(\s*['"`](.*?)['"`]/g) ?? [];
+        matches.forEach(m => names.push(m.replace(/test\s*\(\s*['"`]/, '').replace(/['"`]$/, '')));
       }
     });
   };
@@ -105,107 +81,97 @@ function collectExistingTestNames(): string[] {
   return names;
 }
 
-/** Collect existing page objects to give Claude context */
-function collectPageObjects(): string {
+// ─── Collect Page Objects ─────────────────────────────────────────────────────
+
+function getPageObjects(): string {
   let result = '';
   if (!fs.existsSync(PAGES_DIR)) return result;
   fs.readdirSync(PAGES_DIR)
     .filter(f => f.endsWith('.ts'))
     .forEach(f => {
-      result += `\n\n// File: pages/${f}\n`;
-      result += fs.readFileSync(path.join(PAGES_DIR, f), 'utf-8');
+      result += `\n// pages/${f}\n`;
+      result += fs.readFileSync(path.join(PAGES_DIR, f), 'utf-8').substring(0, 600);
     });
   return result;
 }
 
-// ─── Main Agent ──────────────────────────────────────────────────────────────
+// ─── Generate Tests Using Groq ────────────────────────────────────────────────
 
 async function generateTests(targetUrl: string, outputName: string): Promise<void> {
-  const context = await scrapePage(targetUrl);
-  const pageObjects = collectPageObjects();
+  const { url, title, elements } = await scrapePage(targetUrl);
+  const existingNames = getExistingTestNames();
+  const pageObjects   = getPageObjects();
 
-  const systemPrompt = `You are an expert QA automation engineer specialising in Playwright TypeScript.
-Your task is to generate comprehensive, production-quality test cases for a given web page.
+  const prompt = `You are an expert Playwright TypeScript test automation engineer.
 
-Rules:
+Generate a complete Playwright test spec file for this page.
+
+PAGE INFO:
+URL: ${url}
+Title: ${title}
+
+INTERACTIVE ELEMENTS:
+${elements.join('\n')}
+
+EXISTING PAGE OBJECTS (reuse these):
+${pageObjects.substring(0, 2000)}
+
+EXISTING TEST NAMES (do NOT duplicate):
+${existingNames.join('\n')}
+
+RULES:
 1. Use TypeScript with @playwright/test
-2. Follow the Page Object Model pattern — create or extend a page object if needed
-3. Use data-test attributes as the primary selector strategy (most stable)
-4. Cover: happy paths, edge cases, validation errors, navigation, and accessibility basics
-5. Use descriptive test names with a TC-XXX prefix (continue from existing IDs)
-6. Do NOT duplicate any of the existing test names listed
-7. Group tests in describe blocks
-8. Use beforeEach to handle login and navigation
-9. Return ONLY valid TypeScript code — no markdown fences, no explanations`;
+2. Prefer data-test attributes as selectors
+3. Cover happy paths, error cases, and navigation
+4. Name tests TC-NEW-01, TC-NEW-02 etc
+5. Group in a describe block with beforeEach for login
+6. Return ONLY valid TypeScript — no markdown, no explanations
 
-  const userPrompt = `Generate Playwright TS tests for this page:
+Generate the test file:`;
 
-URL: ${context.url}
-Title: ${context.title}
+  console.log(`\n🤖 Asking Groq to generate tests...`);
 
-Interactive Elements Found:
-${context.interactiveElements.slice(0, 30).join('\n')}
-
-Existing Page Objects (for reference):
-${pageObjects}
-
-Existing Test Names (DO NOT duplicate):
-${context.existingTests.join('\n')}
-
-Generate a complete test spec file for this page. Be thorough.`;
-
-  console.log('🤖 Asking Claude to generate tests...');
-
-  const message = await client.messages.create({
-    model: 'claude-opus-4-5',
-    max_tokens: 4096,
-    messages: [
-      {
-        role: 'user',
-        content: userPrompt,
-      },
-    ],
-    system: systemPrompt,
+  const response = await groq.chat.completions.create({
+    model: MODEL,
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.2,
   });
 
-  const generatedCode = message.content
-    .filter(block => block.type === 'text')
-    .map(block => (block as { type: 'text'; text: string }).text)
-    .join('');
+  let code = response.choices[0].message.content?.trim() ?? '';
 
-  // Determine output path
+  // Strip markdown fences if model added them
+  code = code.replace(/^```typescript\n?/i, '').replace(/^```ts\n?/i, '').replace(/^```\n?/, '').replace(/```$/, '').trim();
+
   const outputDir  = path.join(TESTS_DIR, 'generated');
   const outputFile = path.join(outputDir, `${outputName}.spec.ts`);
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(outputFile, code, 'utf-8');
 
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
-
-  fs.writeFileSync(outputFile, generatedCode, 'utf-8');
-
-  console.log(`✅ Generated tests saved to: ${outputFile}`);
-  console.log(`📊 Tokens used — input: ${message.usage.input_tokens}, output: ${message.usage.output_tokens}`);
+  console.log(`✅ Tests saved to: tests/generated/${outputName}.spec.ts`);
 }
 
-// ─── CLI Entry Point ──────────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────────────
 
 (async () => {
-  const args = process.argv.slice(2);
-  const urlFlag  = args.findIndex(a => a === '--url');
-  const nameFlag = args.findIndex(a => a === '--name');
+  console.log('🤖 AI Test Generator starting (powered by Groq — free & fast)\n');
 
-  const targetUrl  = urlFlag  !== -1 ? args[urlFlag  + 1] : `${BASE_URL}/inventory.html`;
-  const outputName = nameFlag !== -1 ? args[nameFlag + 1] : 'auto-generated';
-
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('❌ ANTHROPIC_API_KEY environment variable is not set.');
+  if (!process.env.GROQ_API_KEY) {
+    console.error('❌ GROQ_API_KEY is not set.');
+    console.error('   Get a free key at: https://console.groq.com');
+    console.error('   Then run: export GROQ_API_KEY=your-key-here');
     process.exit(1);
   }
 
+  const args      = process.argv.slice(2);
+  const urlFlag   = args.indexOf('--url');
+  const nameFlag  = args.indexOf('--name');
+  const targetUrl = urlFlag  !== -1 ? args[urlFlag  + 1] : `${BASE_URL}/inventory.html`;
+  const outName   = nameFlag !== -1 ? args[nameFlag + 1] : 'auto-generated';
+
   try {
-    await generateTests(targetUrl, outputName);
+    await generateTests(targetUrl, outName);
   } catch (err) {
-    console.error('❌ Test generation failed:', err);
+    console.error('❌ Generation failed:', err);
     process.exit(1);
   }
 })();
