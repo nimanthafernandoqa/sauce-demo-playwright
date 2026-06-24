@@ -1,17 +1,18 @@
 /**
- * AI Self-Healing Agent (Groq version — free & fast)
+ * AI Self-Healing Agent (Anthropic Claude)
  * ─────────────────────────────────────────────────────────────────────────────
- * Reads Playwright's JSON test results, identifies failing tests, then uses
- * Groq's free API to suggest fixed locators by re-inspecting the live page.
+ * Reads Playwright JSON results, finds failing tests, then uses Claude to
+ * suggest fixed selectors by re-inspecting the live page.
  *
  * Usage:
- *   export GROQ_API_KEY=your-key-here
- *   npx ts-node agents/self-healer.ts
+ *   export ANTHROPIC_API_KEY=sk-ant-...
+ *   npx ts-node agents/self-healer.ts --dry-run   ← preview fixes only
+ *   npx ts-node agents/self-healer.ts             ← apply fixes
  *
- * Free API key: https://console.groq.com
+ * Always run --dry-run first and review before applying!
  */
 
-import Groq from 'groq-sdk';
+import Anthropic from '@anthropic-ai/sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 import { chromium } from '@playwright/test';
@@ -20,10 +21,11 @@ import { chromium } from '@playwright/test';
 
 const BASE_URL   = 'https://www.saucedemo.com';
 const TESTS_DIR  = path.join(__dirname, '..', 'tests');
+const PAGES_DIR  = path.join(__dirname, '..', 'pages');
 const REPORT_DIR = path.join(__dirname, '..', 'test-results');
-const MODEL = 'llama-3.3-70b-versatile'; // free on Groq, very capable
+const MODEL      = 'claude-haiku-4-5-20251001'; // fast + cheap
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -48,16 +50,13 @@ function parseFailingTests(): FailedTest[] {
   const failures: FailedTest[] = [];
 
   if (!fs.existsSync(jsonReport)) {
-    console.log('⚠️  No JSON report found at test-results/results.json');
-    console.log('    Run: PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/results.json npx playwright test --reporter=json --project=chromium');
+    console.log('⚠️  No JSON report found.');
+    console.log('    Run: PLAYWRIGHT_JSON_OUTPUT_NAME=test-results/results.json npx playwright test --reporter=json --project=chromium --grep "TC-AUTH-01"');
     return failures;
   }
 
   const raw = fs.readFileSync(jsonReport, 'utf-8').trim();
-  if (!raw) {
-    console.log('⚠️  results.json is empty.');
-    return failures;
-  }
+  if (!raw) { console.log('⚠️  results.json is empty.'); return failures; }
 
   const report = JSON.parse(raw);
 
@@ -69,7 +68,7 @@ function parseFailingTests(): FailedTest[] {
         const status = result?.status ?? test.status ?? '';
         if (status === 'failed' || status === 'timedOut') {
           failures.push({
-            title: spec.title ?? test.title ?? 'Unknown test',
+            title: spec.title ?? 'Unknown test',
             file,
             error: result?.error?.message ?? 'Unknown error',
           });
@@ -86,7 +85,7 @@ function parseFailingTests(): FailedTest[] {
 // ─── Inspect Live Page ────────────────────────────────────────────────────────
 
 async function getPageElements(url: string): Promise<string> {
-  console.log(`   🔍 Inspecting live page: ${url}`);
+  console.log(`   🔍 Inspecting: ${url}`);
   const browser = await chromium.launch();
   const page    = await browser.newPage();
 
@@ -109,7 +108,7 @@ async function getPageElements(url: string): Promise<string> {
           result.push(`${tag} | data-test="${dataTest}" | id="${id}" | text="${text}"`);
         }
       });
-      return result.slice(0, 60);
+      return result.slice(0, 50);
     });
 
     return elements.join('\n');
@@ -118,40 +117,36 @@ async function getPageElements(url: string): Promise<string> {
   }
 }
 
-// ─── Read Test Source File ────────────────────────────────────────────────────
+// ─── Read Source File ─────────────────────────────────────────────────────────
 
-function readTestFile(filePath: string): string {
+function readSourceFile(filePath: string): string {
   if (path.isAbsolute(filePath) && fs.existsSync(filePath)) {
     return fs.readFileSync(filePath, 'utf-8');
   }
-
-  const relative = path.join(TESTS_DIR, filePath);
-  if (fs.existsSync(relative)) return fs.readFileSync(relative, 'utf-8');
-
   let found = '';
-  const searchDirs = [TESTS_DIR, path.join(__dirname, '..', 'pages')];
-  searchDirs.forEach(dir => {
+  const walk = (dir: string) => {
     if (!fs.existsSync(dir)) return;
-    const walk = (d: string) => {
-      fs.readdirSync(d).forEach(f => {
-        const fp = path.join(d, f);
-        if (fs.statSync(fp).isDirectory()) walk(fp);
-        else if (fp.endsWith(path.basename(filePath))) found = fs.readFileSync(fp, 'utf-8');
-      });
-    };
-    walk(dir);
-  });
+    fs.readdirSync(dir).forEach(f => {
+      const fp = path.join(dir, f);
+      if (fs.statSync(fp).isDirectory()) walk(fp);
+      else if (fp.endsWith('.ts') && fp.includes(path.basename(filePath, '.ts'))) {
+        found = fs.readFileSync(fp, 'utf-8');
+      }
+    });
+  };
+  walk(TESTS_DIR);
+  walk(PAGES_DIR);
   return found;
 }
 
-// ─── Heal Test Using Groq ────────────────────────────────────────────────────
+// ─── Ask Claude ───────────────────────────────────────────────────────────────
 
 async function healTest(failure: FailedTest): Promise<HealSuggestion[]> {
   console.log(`\n🩺 Analysing: "${failure.title}"`);
 
-  const testSource = readTestFile(failure.file);
-  if (!testSource) {
-    console.log(`   ⚠️  Could not read source: ${failure.file}`);
+  const source = readSourceFile(failure.file);
+  if (!source) {
+    console.log(`   ⚠️  Could not read: ${failure.file}`);
     return [];
   }
 
@@ -162,74 +157,61 @@ async function healTest(failure: FailedTest): Promise<HealSuggestion[]> {
 
   const liveDom = await getPageElements(pageUrl);
 
-  const prompt = `You are a Playwright test automation expert. A test is failing because a selector is broken.
+  const prompt = `You are a Playwright TypeScript expert fixing broken selectors.
 
-FAILING TEST:
-Title: ${failure.title}
-Error: ${failure.error}
+FAILING TEST: ${failure.title}
+ERROR: ${failure.error}
 
-TEST SOURCE CODE:
-${testSource.substring(0, 3000)}
+SOURCE CODE:
+${source.substring(0, 2500)}
 
-LIVE PAGE ELEMENTS (current DOM at ${pageUrl}):
+LIVE PAGE ELEMENTS at ${pageUrl}:
 ${liveDom}
 
-TASK: Find which selector is broken and suggest the correct one.
-Prefer data-test attributes. Return ONLY a JSON array, nothing else:
-[
-  {
-    "originalSelector": "[data-test=\\"broken\\"]",
-    "suggestedSelector": "[data-test=\\"correct\\"]",
-    "reasoning": "why this fix works",
-    "confidence": "high"
-  }
-]
-If no fix found, return: []`;
+Return ONLY a JSON array. No explanation. No markdown. Just JSON:
+[{"originalSelector":"...","suggestedSelector":"...","reasoning":"...","confidence":"high"}]
 
-  console.log(`   🤖 Asking Groq (${MODEL})...`);
+If nothing to fix return: []`;
+
+  console.log(`   🤖 Asking Claude...`);
+
+  const message = await client.messages.create({
+    model: MODEL,
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const raw = message.content
+    .filter(b => b.type === 'text')
+    .map(b => (b as { type: 'text'; text: string }).text)
+    .join('').trim();
+
+  const jsonMatch = raw.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) {
+    console.log(`   ⚠️  No valid JSON in response`);
+    return [];
+  }
 
   try {
-    const response = await groq.chat.completions.create({
-      model: MODEL,
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-    });
-
-    const raw = response.choices[0].message.content?.trim() ?? '';
-    const jsonMatch = raw.match(/\[[\s\S]*\]/);
-
-    if (!jsonMatch) {
-      console.log(`   ⚠️  Model did not return valid JSON`);
-      return [];
-    }
-
     const suggestions: Omit<HealSuggestion, 'file'>[] = JSON.parse(jsonMatch[0]);
     return suggestions.map(s => ({ ...s, file: failure.file }));
-
-  } catch (err: any) {
-    // Catch rate limit or other API errors gracefully
-    if (err?.status === 429) {
-      console.log('   ⚠️  Rate limit hit — waiting 5 seconds...');
-      await new Promise(r => setTimeout(r, 5000));
-      return healTest(failure); // retry once
-    }
-    throw err;
+  } catch {
+    console.log(`   ⚠️  Could not parse response`);
+    return [];
   }
 }
 
 // ─── Apply Fixes ─────────────────────────────────────────────────────────────
 
 function applySuggestions(suggestions: HealSuggestion[]): void {
-  const searchDirs = [TESTS_DIR, path.join(__dirname, '..', 'pages')];
-
   suggestions.forEach(fix => {
     if (fix.confidence === 'low') {
-      console.log(`   ⏭️  Skipping low-confidence fix: ${fix.originalSelector}`);
+      console.log(`   ⏭️  Skipping low-confidence: ${fix.originalSelector}`);
       return;
     }
 
     let patched = false;
-    searchDirs.forEach(dir => {
+    [TESTS_DIR, PAGES_DIR].forEach(dir => {
       if (!fs.existsSync(dir)) return;
       const walk = (d: string) => {
         fs.readdirSync(d).forEach(f => {
@@ -241,9 +223,8 @@ function applySuggestions(suggestions: HealSuggestion[]): void {
             if (content.includes(fix.originalSelector)) {
               content = content.split(fix.originalSelector).join(fix.suggestedSelector);
               fs.writeFileSync(fp, content, 'utf-8');
-              console.log(`   ✅ Fixed [${fix.confidence}] in ${path.basename(fp)}:`);
-              console.log(`      "${fix.originalSelector}"`);
-              console.log(`      → "${fix.suggestedSelector}"`);
+              console.log(`   ✅ Fixed in ${path.basename(fp)}:`);
+              console.log(`      "${fix.originalSelector}" → "${fix.suggestedSelector}"`);
               console.log(`      Reason: ${fix.reasoning}`);
               patched = true;
             }
@@ -253,37 +234,26 @@ function applySuggestions(suggestions: HealSuggestion[]): void {
       walk(dir);
     });
 
-    if (!patched) {
-      console.log(`   ⚠️  Selector not found in any file: ${fix.originalSelector}`);
-    }
+    if (!patched) console.log(`   ⚠️  Selector not found in any file: ${fix.originalSelector}`);
   });
-}
-
-// ─── Save Report ─────────────────────────────────────────────────────────────
-
-function writeHealReport(suggestions: HealSuggestion[]): void {
-  if (!fs.existsSync(REPORT_DIR)) fs.mkdirSync(REPORT_DIR, { recursive: true });
-  const reportPath = path.join(REPORT_DIR, 'heal-report.json');
-  fs.writeFileSync(reportPath, JSON.stringify(suggestions, null, 2), 'utf-8');
-  console.log(`\n📄 Heal report saved to: test-results/heal-report.json`);
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 (async () => {
-  console.log('🤖 AI Self-Healing Agent starting (powered by Groq — free & fast)\n');
+  console.log('🤖 AI Self-Healing Agent (Claude)\n');
 
-  if (!process.env.GROQ_API_KEY) {
-    console.error('❌ GROQ_API_KEY is not set.');
-    console.error('   Get a free key at: https://console.groq.com');
-    console.error('   Then run: export GROQ_API_KEY=your-key-here');
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error('❌ ANTHROPIC_API_KEY not set.');
+    console.error('   export ANTHROPIC_API_KEY=sk-ant-...');
     process.exit(1);
   }
 
+  const dryRun   = process.argv.includes('--dry-run');
   const failures = parseFailingTests();
 
   if (failures.length === 0) {
-    console.log('🎉 No failing tests found — nothing to heal!');
+    console.log('🎉 No failing tests found!');
     process.exit(0);
   }
 
@@ -297,33 +267,31 @@ function writeHealReport(suggestions: HealSuggestion[]): void {
       const suggestions = await healTest(failure);
       allSuggestions.push(...suggestions);
     } catch (err) {
-      console.error(`❌ Error healing "${failure.title}":`, err);
+      console.error(`❌ Error on "${failure.title}":`, err);
     }
   }
 
   if (allSuggestions.length === 0) {
-    console.log('\n🤷 No selector fixes could be determined.');
+    console.log('\n🤷 No fixes found.');
     process.exit(0);
   }
 
-  console.log(`\n🔧 Applying ${allSuggestions.length} fix(es)...\n`);
-  applySuggestions(allSuggestions);
-  writeHealReport(allSuggestions);
-
-  const dryRun = process.argv.includes('--dry-run');
-
-if (dryRun) {
-  console.log('\n📋 DRY RUN — suggested fixes (not applied):\n');
-  allSuggestions.forEach(s => {
-    console.log(`  File: ${s.file}`);
-    console.log(`  Old:  ${s.originalSelector}`);
-    console.log(`  New:  ${s.suggestedSelector}`);
-    console.log(`  Why:  ${s.reasoning}`);
-    console.log(`  Confidence: ${s.confidence}\n`);
-  });
-  console.log('Run without --dry-run to apply, or fix manually.');
-} else {
-  console.log(`\n🔧 Applying ${allSuggestions.length} fix(es)...\n`);
-  applySuggestions(allSuggestions);
-}
+  if (dryRun) {
+    console.log('\n📋 DRY RUN — suggested fixes (not applied):\n');
+    allSuggestions.forEach(s => {
+      console.log(`  File:       ${s.file}`);
+      console.log(`  Old:        ${s.originalSelector}`);
+      console.log(`  New:        ${s.suggestedSelector}`);
+      console.log(`  Reason:     ${s.reasoning}`);
+      console.log(`  Confidence: ${s.confidence}\n`);
+    });
+    console.log('✅ Review above. If correct, run without --dry-run to apply.');
+  } else {
+    console.log(`\n🔧 Applying ${allSuggestions.length} fix(es)...\n`);
+    applySuggestions(allSuggestions);
+    const reportPath = path.join(REPORT_DIR, 'heal-report.json');
+    fs.writeFileSync(reportPath, JSON.stringify(allSuggestions, null, 2));
+    console.log(`\n📄 Report: test-results/heal-report.json`);
+    console.log('\n✅ Done! Run npm test to verify.');
+  }
 })();
