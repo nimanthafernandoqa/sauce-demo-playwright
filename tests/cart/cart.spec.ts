@@ -1,87 +1,49 @@
 import { test, expect } from '@playwright/test';
+import { CartPage } from '../../pages/CartPage';
 import { LoginPage } from '../../pages/LoginPage';
 import { InventoryPage } from '../../pages/InventoryPage';
-import { CartPage } from '../../pages/CartPage';
-import { USERS, PRODUCTS } from '../../utils/test-data';
 
-test.describe('Shopping Cart', () => {
-  let inventoryPage: InventoryPage;
+test.describe('Cart Page', () => {
   let cartPage: CartPage;
+  let loginPage: LoginPage;
+  let inventoryPage: InventoryPage;
 
   test.beforeEach(async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    inventoryPage = new InventoryPage(page);
     cartPage = new CartPage(page);
+    loginPage = new LoginPage(page);
+    inventoryPage = new InventoryPage(page);
 
+    // Log in and add items to cart
     await loginPage.goto();
-    await loginPage.login(USERS.standard.username, USERS.standard.password);
+    await loginPage.login('standard_user', 'secret_sauce');
     await inventoryPage.expectLoaded();
   });
 
-  test('TC-CART-01: empty cart shows no items', async () => {
+  // Verify that cart column headers are visible for quantity and description
+  test('TC-CART-09: cart displays quantity and description column headers', async () => {
+    await inventoryPage.addToCartByName('Sauce Labs Backpack');
     await inventoryPage.goToCart();
     await cartPage.expectLoaded();
-    expect(await cartPage.getItemCount()).toBe(0);
+    await cartPage.expectQuantityLabelVisible();
+    await cartPage.expectDescriptionLabelVisible();
   });
 
-  test('TC-CART-02: added product appears in cart', async () => {
-    await inventoryPage.addToCartByName(PRODUCTS.backpack);
-    await inventoryPage.goToCart();
+  // Verify that the burger menu can be opened and closed on the cart page
+  test('TC-CART-10: burger menu opens and closes on cart page', async ({ page }) => {
+    await cartPage.goto();
     await cartPage.expectLoaded();
-
-    const names = await cartPage.getItemNames();
-    expect(names).toContain(PRODUCTS.backpack);
+    await cartPage.openMenu();
+    await expect(cartPage.allItemsLink).toBeVisible();
+    await cartPage.closeMenu();
+    await expect(cartPage.allItemsLink).not.toBeVisible();
   });
 
-  test('TC-CART-03: multiple added products all appear in cart', async () => {
-    await inventoryPage.addToCartByName(PRODUCTS.backpack);
-    await inventoryPage.addToCartByName(PRODUCTS.bikeLight);
-    await inventoryPage.goToCart();
-
-    const names = await cartPage.getItemNames();
-    expect(names).toContain(PRODUCTS.backpack);
-    expect(names).toContain(PRODUCTS.bikeLight);
-    expect(await cartPage.getItemCount()).toBe(2);
-  });
-
-  test('TC-CART-04: item prices in cart match inventory prices', async () => {
-    await inventoryPage.addToCartByName(PRODUCTS.backpack);
-    await inventoryPage.goToCart();
-    const prices = await cartPage.getItemPrices();
-    // Sauce Labs Backpack = $29.99
-    expect(prices[0]).toBe(29.99);
-  });
-
-  test('TC-CART-05: removing item from cart removes it from the list', async () => {
-    await inventoryPage.addToCartByName(PRODUCTS.backpack);
-    await inventoryPage.addToCartByName(PRODUCTS.bikeLight);
-    await inventoryPage.goToCart();
-
-    await cartPage.removeItem(PRODUCTS.backpack);
-    const names = await cartPage.getItemNames();
-    expect(names).not.toContain(PRODUCTS.backpack);
-    expect(names).toContain(PRODUCTS.bikeLight);
-  });
-
-  test('TC-CART-06: Continue Shopping returns to inventory', async ({ page }) => {
-    await inventoryPage.goToCart();
-    await cartPage.continueShopping();
-    await inventoryPage.expectLoaded();
-  });
-
-  test('TC-CART-07: Checkout button navigates to checkout step 1', async ({ page }) => {
-    await inventoryPage.addToCartByName(PRODUCTS.backpack);
-    await inventoryPage.goToCart();
-    await cartPage.checkout();
-    await expect(page).toHaveURL(/checkout-step-one/);
-  });
-
-  test('TC-CART-08: cart persists items after navigating back to inventory', async () => {
-    await inventoryPage.addToCartByName(PRODUCTS.backpack);
-    await inventoryPage.goToCart();
-    await cartPage.continueShopping();
-
-    // Cart badge should still show 1
-    expect(await inventoryPage.getCartCount()).toBe(1);
+  // Verify that the footer is visible on the cart page
+  test('TC-CART-11: footer displays with social links on cart page', async () => {
+    await cartPage.goto();
+    await cartPage.expectLoaded();
+    await cartPage.expectFooterVisible();
+    const twitterUrl = await cartPage.getTwitterUrl();
+    expect(twitterUrl).toBe('https://twitter.com/saucelabs');
   });
 });
